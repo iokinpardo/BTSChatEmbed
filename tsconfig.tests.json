@@ -1,0 +1,14 @@
+{
+  "extends": "./tsconfig.json",
+  "include": ["src/sdk/**/*", "tests/**/*.ts"],
+  "compilerOptions": {
+    "outDir": ".tmp-tests",
+    "noEmit": false,
+    "declaration": false,
+    "declarationMap": false,
+    "emitDeclarationOnly": false,
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "target": "ES2020"
+  }
+}
