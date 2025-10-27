@@ -13,7 +13,8 @@
     "format": "prettier --write \"**/*.{js,jsx,ts,tsx,md,mdx}\"",
     "format:check": "prettier --check \"**/*.{js,jsx,ts,tsx,md,mdx}\"",
     "prepare": "husky install",
-    "start": "node server.js"
+    "start": "node server.js",
+    "test": "node -e \"try{require('fs').rmSync('.tmp-tests',{recursive:true,force:true});}catch(e){}\" && tsc --project tsconfig.tests.json && node --test .tmp-tests/tests/chatOrchestrator.test.js"
   },
   "license": "MIT",
   "dependencies": {

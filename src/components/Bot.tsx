@@ -34,10 +34,12 @@ import { CircleDotIcon, SparklesIcon, TrashIcon } from './icons';
 import { CancelButton } from './buttons/CancelButton';
 import { cancelAudioRecording, startAudioRecording, stopAudioRecording } from '@/utils/audioRecording';
 import { LeadCaptureBubble } from '@/components/bubbles/LeadCaptureBubble';
+import { UnifiedBot, MultiProviderProps } from './UnifiedBot';
 import { removeLocalStorageChatHistory, getLocalStorageChatflow, setLocalStorageChatflow, setCookie, getCookie } from '@/utils';
 import { cloneDeep } from 'lodash';
 import { FollowUpPromptBubble } from '@/components/bubbles/FollowUpPromptBubble';
 import { fetchEventSource, EventStreamContentType } from '@microsoft/fetch-event-source';
+import type { ProviderDescriptor, OrchestratorOptions } from '@/sdk';
 
 export type FileEvent<T = EventTarget> = {
   target: T;
@@ -174,6 +176,8 @@ export type BotProps = {
   dateTimeToggle?: DateTimeToggleTheme;
   renderHTML?: boolean;
   closeBot?: () => void;
+  providers?: ProviderDescriptor[];
+  orchestratorOptions?: OrchestratorOptions;
 };
 
 export type LeadsConfig = {
@@ -455,6 +459,10 @@ const FormInputView = (props: {
 };
 
 export const Bot = (botProps: BotProps & { class?: string }) => {
+  if (botProps.providers && botProps.providers.length) {
+    return <UnifiedBot {...(botProps as MultiProviderProps)} providers={botProps.providers} orchestratorOptions={botProps.orchestratorOptions} />;
+  }
+
   // set a default value for showTitle if not set and merge with other props
   const props = mergeProps({ showTitle: true }, botProps);
   let chatContainer: HTMLDivElement | undefined;
