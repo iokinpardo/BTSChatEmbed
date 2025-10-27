@@ -81,6 +81,36 @@ yarn build
 
 **Dependencies**: Requires a proxy/BFF endpoint that exposes the Flowise, n8n, or OpenAI agent APIs and accepts the canonical payload `{ sessionId, message, files[], variables{} }`.
 
+### Pruebas locales con un chatflow de Flowise alojado en Render
+
+**Purpose / Propósito**: Conectar desde tu equipo a un chatflow de Flowise que está protegido por el proxy desplegado en Render (por ejemplo `https://btschatembed.onrender.com`) y validar el widget antes de integrarlo en producción.
+
+1. Clona este repositorio y ejecuta `yarn install`.
+2. Asegúrate de que tu servicio en Render tenga definidas las variables de entorno mínimas:
+   - `API_HOST` apuntando a tu instancia de Flowise.
+   - `FLOWISE_API_KEY` con el API Key generado en Flowise.
+   - Una variable por chatflow que quieras exponer (por ejemplo `SOPORTE_BOT=<id-del-chatflow>,https://btschatembed.onrender.com,http://localhost:5678`). El identificador (`SOPORTE_BOT`) será el valor que usarás en `chatflowid` desde el frontend y la lista de dominios incluye el propio Render y tu entorno local.
+3. Arranca el servidor de desarrollo local con `yarn dev` para servir `public/index.html` en `http://localhost:5678`.
+4. Edita `public/index.html` y sustituye el snippet de inicialización por el siguiente, apuntando tanto el script como el `apiHost` a Render:
+
+**Usage example / Ejemplo de uso**:
+
+```html
+<script type="module">
+  import Chatbot from 'https://btschatembed.onrender.com/web.js';
+
+  Chatbot.init({
+    chatflowid: 'SOPORTE_BOT',
+    apiHost: 'https://btschatembed.onrender.com',
+  });
+
+  // Abre http://localhost:5678 en tu navegador y envía un mensaje.
+  // El proxy en Render redireccionará la conversación al chatflow configurado en Flowise usando tu API key.
+</script>
+```
+
+**Dependencies / Dependencias**: Necesitas que el chatflow esté registrado como variable de entorno en Render y que `http://localhost:5678` esté en la lista de dominios permitidos. No se requieren descargas adicionales más allá de este repositorio y el despliegue en Render.
+
 ## Embed in your HTML
 
 ### PopUp
