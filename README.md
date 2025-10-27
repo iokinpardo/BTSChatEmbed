@@ -37,6 +37,50 @@ Build:
 yarn build
 ```
 
+## Features
+
+### Multi-provider orchestration
+
+**Purpose**: Embed a single chat experience while routing conversations through Flowise, n8n, or OpenAI Agent Builder backends without changing the UI.
+
+**Usage example**:
+
+```html
+<script type="module">
+  import Chatbot from 'https://cdn.jsdelivr.net/npm/flowise-embed/dist/web.js';
+
+  Chatbot.init({
+    providers: [
+      {
+        id: 'flowise-provider',
+        label: 'Flowise',
+        type: 'flowise',
+        destinations: [
+          { id: 'chatflow-id', label: 'Support Bot', metadata: { chatflowId: '<your-chatflow-id>' } },
+        ],
+        config: {
+          apiHost: 'https://your-bff.example.com',
+        },
+      },
+      {
+        id: 'n8n-provider',
+        label: 'n8n',
+        type: 'n8n',
+        destinations: [{ id: 'support-webhook', label: 'Support Workflow', metadata: { path: '/providers/n8n/support/messages' } }],
+        config: {
+          apiHost: 'https://your-bff.example.com',
+        },
+      },
+    ],
+    orchestratorOptions: {
+      sessionId: 'my-shared-session',
+    },
+  });
+</script>
+```
+
+**Dependencies**: Requires a proxy/BFF endpoint that exposes the Flowise, n8n, or OpenAI agent APIs and accepts the canonical payload `{ sessionId, message, files[], variables{} }`.
+
 ## Embed in your HTML
 
 ### PopUp
