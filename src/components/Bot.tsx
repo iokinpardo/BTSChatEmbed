@@ -2422,85 +2422,86 @@ export const Bot = (botProps: BotProps & { class?: string }) => {
               </DeleteButton>
             </div>
           ) : null}
-          <div class="flex flex-col w-full h-full justify-start z-0">
-            <div
-              ref={chatContainer}
-              class="overflow-y-scroll flex flex-col flex-grow min-w-full w-full px-3 pt-[70px] relative scrollable-container chatbot-chat-view scroll-smooth"
-            >
-              <For each={[...messages()]}>
-                {(message, index) => {
-                  return (
-                    <>
-                      {message.type === 'userMessage' && (
-                        <GuestBubble
-                          message={message}
-                          apiHost={props.apiHost}
-                          chatflowid={props.chatflowid}
-                          chatId={chatId()}
-                          backgroundColor={props.userMessage?.backgroundColor}
-                          textColor={props.userMessage?.textColor}
-                          showAvatar={props.userMessage?.showAvatar}
-                          avatarSrc={props.userMessage?.avatarSrc}
-                          fontSize={props.fontSize}
-                          renderHTML={props.renderHTML}
-                        />
-                      )}
-                      {message.type === 'apiMessage' && (
-                        <BotBubble
-                          message={message}
-                          fileAnnotations={message.fileAnnotations}
-                          chatflowid={props.chatflowid}
-                          chatId={chatId()}
-                          apiHost={props.apiHost}
-                          backgroundColor={props.botMessage?.backgroundColor}
-                          textColor={props.botMessage?.textColor}
-                          feedbackColor={props.feedback?.color}
-                          showAvatar={props.botMessage?.showAvatar}
-                          avatarSrc={props.botMessage?.avatarSrc}
-                          chatFeedbackStatus={chatFeedbackStatus()}
-                          fontSize={props.fontSize}
-                          isLoading={loading() && index() === messages().length - 1}
-                          showAgentMessages={props.showAgentMessages}
-                          handleActionClick={(elem, action) => handleActionClick(elem, action)}
-                          sourceDocsTitle={props.sourceDocsTitle}
-                          handleSourceDocumentsClick={(sourceDocuments) => {
-                            setSourcePopupSrc(sourceDocuments);
-                            setSourcePopupOpen(true);
-                          }}
-                          dateTimeToggle={props.dateTimeToggle}
-                          renderHTML={props.renderHTML}
-                          isTTSEnabled={isTTSEnabled()}
-                          isTTSLoading={isTTSLoading()}
-                          isTTSPlaying={isTTSPlaying()}
-                          handleTTSClick={handleTTSClick}
-                          handleTTSStop={handleTTSStop}
-                        />
-                      )}
-                      {message.type === 'leadCaptureMessage' && leadsConfig()?.status && !getLocalStorageChatflow(props.chatflowid)?.lead && (
-                        <LeadCaptureBubble
-                          message={message}
-                          chatflowid={props.chatflowid}
-                          chatId={chatId()}
-                          apiHost={props.apiHost}
-                          backgroundColor={props.botMessage?.backgroundColor}
-                          textColor={props.botMessage?.textColor}
-                          fontSize={props.fontSize}
-                          showAvatar={props.botMessage?.showAvatar}
-                          avatarSrc={props.botMessage?.avatarSrc}
-                          leadsConfig={leadsConfig()}
-                          sendButtonColor={props.textInput?.sendButtonColor}
-                          isLeadSaved={isLeadSaved()}
-                          setIsLeadSaved={setIsLeadSaved}
-                          setLeadEmail={setLeadEmail}
-                        />
-                      )}
-                      {message.type === 'userMessage' && loading() && index() === messages().length - 1 && <LoadingBubble />}
-                      {message.type === 'apiMessage' && message.message === '' && loading() && index() === messages().length - 1 && <LoadingBubble />}
-                    </>
-                  );
-                }}
-              </For>
-            </div>
+          <div class="flex flex-col w-full h-full min-h-0 justify-start z-0">
+            <div class="flex flex-col flex-1 min-h-0">
+              <div
+                ref={chatContainer}
+                class="overflow-y-auto flex flex-col flex-1 min-h-0 min-w-full w-full px-3 pt-[70px] pb-4 relative scrollable-container chatbot-chat-view scroll-smooth"
+              >
+                <For each={[...messages()]}> 
+                  {(message, index) => {
+                    return (
+                      <>
+                        {message.type === 'userMessage' && (
+                          <GuestBubble
+                            message={message}
+                            apiHost={props.apiHost}
+                            chatflowid={props.chatflowid}
+                            chatId={chatId()}
+                            backgroundColor={props.userMessage?.backgroundColor}
+                            textColor={props.userMessage?.textColor}
+                            showAvatar={props.userMessage?.showAvatar}
+                            avatarSrc={props.userMessage?.avatarSrc}
+                            fontSize={props.fontSize}
+                            renderHTML={props.renderHTML}
+                          />
+                        )}
+                        {message.type === 'apiMessage' && (
+                          <BotBubble
+                            message={message}
+                            fileAnnotations={message.fileAnnotations}
+                            chatflowid={props.chatflowid}
+                            chatId={chatId()}
+                            apiHost={props.apiHost}
+                            backgroundColor={props.botMessage?.backgroundColor}
+                            textColor={props.botMessage?.textColor}
+                            feedbackColor={props.feedback?.color}
+                            showAvatar={props.botMessage?.showAvatar}
+                            avatarSrc={props.botMessage?.avatarSrc}
+                            chatFeedbackStatus={chatFeedbackStatus()}
+                            fontSize={props.fontSize}
+                            isLoading={loading() && index() === messages().length - 1}
+                            showAgentMessages={props.showAgentMessages}
+                            handleActionClick={(elem, action) => handleActionClick(elem, action)}
+                            sourceDocsTitle={props.sourceDocsTitle}
+                            handleSourceDocumentsClick={(sourceDocuments) => {
+                              setSourcePopupSrc(sourceDocuments);
+                              setSourcePopupOpen(true);
+                            }}
+                            dateTimeToggle={props.dateTimeToggle}
+                            renderHTML={props.renderHTML}
+                            isTTSEnabled={isTTSEnabled()}
+                            isTTSLoading={isTTSLoading()}
+                            isTTSPlaying={isTTSPlaying()}
+                            handleTTSClick={handleTTSClick}
+                            handleTTSStop={handleTTSStop}
+                          />
+                        )}
+                        {message.type === 'leadCaptureMessage' && leadsConfig()?.status && !getLocalStorageChatflow(props.chatflowid)?.lead && (
+                          <LeadCaptureBubble
+                            message={message}
+                            chatflowid={props.chatflowid}
+                            chatId={chatId()}
+                            apiHost={props.apiHost}
+                            backgroundColor={props.botMessage?.backgroundColor}
+                            textColor={props.botMessage?.textColor}
+                            fontSize={props.fontSize}
+                            showAvatar={props.botMessage?.showAvatar}
+                            avatarSrc={props.botMessage?.avatarSrc}
+                            leadsConfig={leadsConfig()}
+                            sendButtonColor={props.textInput?.sendButtonColor}
+                            isLeadSaved={isLeadSaved()}
+                            setIsLeadSaved={setIsLeadSaved}
+                            setLeadEmail={setLeadEmail}
+                          />
+                        )}
+                        {message.type === 'userMessage' && loading() && index() === messages().length - 1 && <LoadingBubble />}
+                        {message.type === 'apiMessage' && message.message === '' && loading() && index() === messages().length - 1 && <LoadingBubble />}
+                      </>
+                    );
+                  }}
+                </For>
+              </div>
             <Show when={messages().length === 1}>
               <Show when={starterPrompts().length > 0}>
                 <div class="w-full flex flex-row flex-wrap px-5 py-[10px] gap-2">
@@ -2542,6 +2543,7 @@ export const Bot = (botProps: BotProps & { class?: string }) => {
                 <For each={[...previews()]}>{(item) => <>{previewDisplay(item)}</>}</For>
               </div>
             </Show>
+            </div>
             <div class="w-full px-5 pt-2 pb-1">
               {isRecording() ? (
                 <>

@@ -1,4 +1,4 @@
-import { createSignal, splitProps } from 'solid-js';
+import { createEffect, createSignal, splitProps } from 'solid-js';
 import { JSX } from 'solid-js/jsx-runtime';
 
 type ShortTextInputProps = {
@@ -9,19 +9,26 @@ type ShortTextInputProps = {
 } & Omit<JSX.TextareaHTMLAttributes<HTMLTextAreaElement>, 'onInput'>;
 
 const DEFAULT_HEIGHT = 56;
+const MAX_HEIGHT = 128;
+
+const clampHeight = (value: number) => Math.min(Math.max(value, DEFAULT_HEIGHT), MAX_HEIGHT);
 
 export const ShortTextInput = (props: ShortTextInputProps) => {
   const [local, others] = splitProps(props, ['ref', 'onInput']);
   const [height, setHeight] = createSignal(56);
 
+  const resizeToContent = (element: HTMLTextAreaElement) => {
+    element.style.height = 'auto';
+    setHeight(clampHeight(element.scrollHeight));
+  };
+
   // @ts-expect-error: unknown type
   const handleInput = (e) => {
     if (props.ref) {
       if (e.currentTarget.value === '') {
-        // reset height when value is empty
         setHeight(DEFAULT_HEIGHT);
       } else {
-        setHeight(e.currentTarget.scrollHeight - 24);
+        resizeToContent(e.currentTarget);
       }
       e.currentTarget.scrollTo(0, e.currentTarget.scrollHeight);
       local.onInput(e.currentTarget.value);
@@ -38,6 +45,21 @@ export const ShortTextInput = (props: ShortTextInputProps) => {
       handleInput(e);
     }
   };
+
+  createEffect(() => {
+    const target = props.ref as HTMLTextAreaElement | undefined;
+
+    if (!target) return;
+
+    if (props.value === '') {
+      setHeight(DEFAULT_HEIGHT);
+      target.style.height = `${DEFAULT_HEIGHT}px`;
+      target.scrollTop = 0;
+      return;
+    }
+
+    resizeToContent(target);
+  });
 
   return (
     <textarea

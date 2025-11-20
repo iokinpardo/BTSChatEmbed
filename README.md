@@ -37,6 +37,49 @@ Build:
 yarn build
 ```
 
+## Features
+
+### Fixed chat layout with scrollable history
+- **Purpose / What it does:** Keeps the chatbot viewport at a consistent height while allowing the full conversation to be explored via scroll without showing a visible scrollbar, mirroring ChatGPT-style layouts.
+- **Usage example:**
+
+```html
+<script type="module">
+  import Chatbot from 'https://cdn.jsdelivr.net/npm/flowise-embed/dist/web.js';
+  Chatbot.init({
+    chatflowid: '<chatflowid>',
+    apiHost: 'http://localhost:3000',
+    theme: {
+      chatWindow: {
+        height: 700,
+        width: 400,
+      },
+    },
+  });
+</script>
+```
+- **Dependencies / breaking changes:** No additional dependencies; scrolling remains available via mouse, trackpad, or touch.
+
+### Multiline composer with automatic reset
+- **Purpose / What it does:** Expands the message input to show multi-line content while typing (e.g., Shift + Enter for new lines) and returns to the default single-line height after sending.
+- **Usage example:**
+
+```html
+<script type="module">
+  import Chatbot from 'https://cdn.jsdelivr.net/npm/flowise-embed/dist/web.js';
+  Chatbot.init({
+    chatflowid: '<chatflowid>',
+    apiHost: 'http://localhost:3000',
+    theme: {
+      textInput: {
+        placeholder: 'Type your question',
+      },
+    },
+  });
+</script>
+```
+- **Dependencies / breaking changes:** None.
+
 ## Embed in your HTML
 
 ### PopUp
