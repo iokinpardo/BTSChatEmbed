@@ -583,11 +583,21 @@ export const Bot = (botProps: BotProps & { class?: string }) => {
     if (!container || !target) return;
 
     requestAnimationFrame(() => {
-      const containerRect = container.getBoundingClientRect();
-      const targetRect = target.getBoundingClientRect();
-      const targetTop = targetRect.top - containerRect.top + container.scrollTop;
+      let offsetTop = target.offsetTop;
+      let node = target.offsetParent as HTMLElement | null;
 
-      container.scrollTo({ top: Math.max(targetTop, 0), behavior: 'smooth' });
+      while (node && node !== container) {
+        offsetTop += node.offsetTop;
+        node = node.offsetParent as HTMLElement | null;
+      }
+
+      if (node !== container) {
+        const containerRect = container.getBoundingClientRect();
+        const targetRect = target.getBoundingClientRect();
+        offsetTop = targetRect.top - containerRect.top + container.scrollTop;
+      }
+
+      container.scrollTo({ top: Math.max(offsetTop, 0), behavior: 'smooth' });
     });
   };
 
@@ -2652,8 +2662,6 @@ export const Bot = (botProps: BotProps & { class?: string }) => {
                   handleFileChange={handleFileChange}
                   sendMessageSound={props.textInput?.sendMessageSound}
                   sendSoundLocation={props.textInput?.sendSoundLocation}
-                  enableInputHistory={true}
-                  maxHistorySize={10}
                 />
               )}
             </div>

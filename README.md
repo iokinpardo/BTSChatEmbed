@@ -81,7 +81,7 @@ yarn build
 - **Dependencies / breaking changes:** None.
 
 ### Caret-friendly Arrow Up/Down navigation
-- **Purpose / What it does:** Keeps Arrow Up/Down focused on moving the caret through multiline drafts without recalling past inputs, preventing unexpected history jumps.
+- **Purpose / What it does:** Keeps Arrow Up/Down focused on moving the caret through multiline drafts without recalling past inputs or surfacing prior submissions, preventing unexpected history jumps.
 - **Usage example:**
 
 ```html
@@ -95,6 +95,21 @@ yarn build
 </script>
 ```
 - **Dependencies / breaking changes:** None.
+
+### Keep the CDN embed up to date
+- **Purpose / What it does:** Ensures you are loading the latest `flowise-embed` bundle (including the caret-only Arrow key handling and reply-alignment fixes) when consuming the script from jsDelivr.
+- **Usage example:**
+
+```html
+<script type="module">
+  import Chatbot from 'https://cdn.jsdelivr.net/npm/flowise-embed@3.0.5/dist/web.js?v=cache-bust-20240606';
+  Chatbot.init({
+    chatflowid: '<chatflowid>',
+    apiHost: 'http://localhost:3000',
+  });
+</script>
+```
+- **Dependencies / breaking changes:** None; add a version pin or cache-busting query when you need to guarantee the updated behavior.
 
 ### Bot replies start at the top of the viewport
 - **Purpose / What it does:** When a long bot reply arrives, the chat view scrolls to the beginning of that message so users start reading from the top instead of the bottom.
