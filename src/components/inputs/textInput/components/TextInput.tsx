@@ -84,21 +84,33 @@ export const TextInput = (props: TextInputProps) => {
   };
 
   const handleKeyDown = (e: KeyboardEvent) => {
+    const target = e.target as HTMLTextAreaElement | null;
+
     if (e.key === 'Enter' && !e.shiftKey) {
       const isIMEComposition = e.isComposing || e.keyCode === 229;
       if (!isIMEComposition) {
         e.preventDefault();
         submit();
       }
-    } else if (props.enableInputHistory) {
+      return;
+    }
+
+    if (props.enableInputHistory && target) {
       if (e.key === 'ArrowUp') {
-        e.preventDefault();
-        const previousInput = inputHistory().getPreviousInput(props.inputValue);
-        props.onInputChange(previousInput);
+        const isAtStart = target.selectionStart === 0 && target.selectionEnd === 0;
+        if (isAtStart) {
+          e.preventDefault();
+          const previousInput = inputHistory().getPreviousInput(props.inputValue);
+          props.onInputChange(previousInput);
+        }
       } else if (e.key === 'ArrowDown') {
-        e.preventDefault();
-        const nextInput = inputHistory().getNextInput();
-        props.onInputChange(nextInput);
+        const isAtEnd =
+          target.selectionStart === target.value.length && target.selectionEnd === target.value.length;
+        if (isAtEnd) {
+          e.preventDefault();
+          const nextInput = inputHistory().getNextInput();
+          props.onInputChange(nextInput);
+        }
       }
     }
   };

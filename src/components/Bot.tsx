@@ -460,6 +460,8 @@ export const Bot = (botProps: BotProps & { class?: string }) => {
   let chatContainer: HTMLDivElement | undefined;
   let bottomSpacer: HTMLDivElement | undefined;
   let botContainer: HTMLDivElement | undefined;
+  let lastBotMessageRef: HTMLElement | undefined;
+  let previousMessageCount = 0;
 
   const [userInput, setUserInput] = createSignal('');
   const [loading, setLoading] = createSignal(false);
@@ -572,6 +574,13 @@ export const Bot = (botProps: BotProps & { class?: string }) => {
     setTimeout(() => {
       chatContainer?.scrollTo(0, chatContainer.scrollHeight);
     }, 50);
+  };
+
+  const scrollToLatestBotMessageStart = () => {
+    if (!chatContainer || !lastBotMessageRef) return;
+
+    const top = lastBotMessageRef.offsetTop;
+    chatContainer.scrollTo({ top, behavior: 'smooth' });
   };
 
   // Helper function to manage TTS action flag
@@ -1281,13 +1290,25 @@ export const Bot = (botProps: BotProps & { class?: string }) => {
 
   // Auto scroll chat to bottom (but not during TTS actions)
   createEffect(() => {
-    if (messages()) {
-      if (messages().length > 1 && !isTTSActionRef) {
+    const currentMessages = messages();
+
+    if (!currentMessages) return;
+
+    const latestMessage = currentMessages[currentMessages.length - 1];
+
+    if (currentMessages.length > 1 && !isTTSActionRef) {
+      if (latestMessage?.type === 'apiMessage' && currentMessages.length !== previousMessageCount) {
+        setTimeout(() => {
+          scrollToLatestBotMessageStart();
+        }, 400);
+      } else if (latestMessage?.type !== 'apiMessage') {
         setTimeout(() => {
           chatContainer?.scrollTo(0, chatContainer.scrollHeight);
         }, 400);
       }
     }
+
+    previousMessageCount = currentMessages.length;
   });
 
   createEffect(() => {
@@ -2428,10 +2449,17 @@ export const Bot = (botProps: BotProps & { class?: string }) => {
                 ref={chatContainer}
                 class="overflow-y-auto flex flex-col flex-1 min-h-0 min-w-full w-full px-3 pt-[70px] pb-4 relative scrollable-container chatbot-chat-view scroll-smooth"
               >
-                <For each={[...messages()]}> 
+                <For each={[...messages()]}>
                   {(message, index) => {
                     return (
-                      <>
+                      <div
+                        ref={(el) => {
+                          if (message.type === 'apiMessage') {
+                            lastBotMessageRef = el;
+                          }
+                        }}
+                        class="w-full"
+                      >
                         {message.type === 'userMessage' && (
                           <GuestBubble
                             message={message}
@@ -2497,7 +2525,7 @@ export const Bot = (botProps: BotProps & { class?: string }) => {
                         )}
                         {message.type === 'userMessage' && loading() && index() === messages().length - 1 && <LoadingBubble />}
                         {message.type === 'apiMessage' && message.message === '' && loading() && index() === messages().length - 1 && <LoadingBubble />}
-                      </>
+                      </div>
                     );
                   }}
                 </For>

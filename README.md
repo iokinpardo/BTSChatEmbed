@@ -80,6 +80,37 @@ yarn build
 ```
 - **Dependencies / breaking changes:** None.
 
+### Caret-friendly input history navigation
+- **Purpose / What it does:** Preserves Arrow Up/Down navigation inside multiline drafts while still allowing history recall when the caret is at the very start or end of the field.
+- **Usage example:**
+
+```html
+<script type="module">
+  import Chatbot from 'https://cdn.jsdelivr.net/npm/flowise-embed/dist/web.js';
+  Chatbot.init({
+    chatflowid: '<chatflowid>',
+    apiHost: 'http://localhost:3000',
+    // Input history is enabled by default; Arrow Up/Down moves within text unless at boundaries
+  });
+</script>
+```
+- **Dependencies / breaking changes:** None.
+
+### Bot replies start at the top of the viewport
+- **Purpose / What it does:** When a long bot reply arrives, the chat view scrolls to the beginning of that message so users start reading from the top instead of the bottom.
+- **Usage example:**
+
+```html
+<script type="module">
+  import Chatbot from 'https://cdn.jsdelivr.net/npm/flowise-embed/dist/web.js';
+  Chatbot.init({
+    chatflowid: '<chatflowid>',
+    apiHost: 'http://localhost:3000',
+  });
+</script>
+```
+- **Dependencies / breaking changes:** None.
+
 ## Embed in your HTML
 
 ### PopUp
