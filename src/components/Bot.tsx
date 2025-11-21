@@ -579,8 +579,9 @@ export const Bot = (botProps: BotProps & { class?: string }) => {
   const scrollToLatestBotMessageStart = () => {
     if (!chatContainer || !lastBotMessageRef) return;
 
-    const top = lastBotMessageRef.offsetTop;
-    chatContainer.scrollTo({ top, behavior: 'smooth' });
+    requestAnimationFrame(() => {
+      lastBotMessageRef?.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest' });
+    });
   };
 
   // Helper function to manage TTS action flag
@@ -938,7 +939,7 @@ export const Bot = (botProps: BotProps & { class?: string }) => {
     setUploadedFiles([]);
     hasSoundPlayed = false;
     setTimeout(() => {
-      scrollToBottom();
+      scrollToLatestBotMessageStart();
     }, 100);
   };
 
@@ -1148,7 +1149,7 @@ export const Bot = (botProps: BotProps & { class?: string }) => {
         setLoading(false);
         setUserInput('');
         setUploadedFiles([]);
-        scrollToBottom();
+        scrollToLatestBotMessageStart();
       }
       if (result.error) {
         const error = result.error;

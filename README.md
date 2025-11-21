@@ -81,7 +81,7 @@ yarn build
 - **Dependencies / breaking changes:** None.
 
 ### Caret-friendly input history navigation
-- **Purpose / What it does:** Preserves Arrow Up/Down navigation inside multiline drafts while still allowing history recall when the caret is at the very start or end of the field.
+- **Purpose / What it does:** Preserves Arrow Up/Down navigation inside multiline drafts while only recalling past inputs when the caret is at the start/end of an empty field.
 - **Usage example:**
 
 ```html
