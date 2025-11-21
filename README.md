@@ -80,8 +80,8 @@ yarn build
 ```
 - **Dependencies / breaking changes:** None.
 
-### Caret-friendly input history navigation
-- **Purpose / What it does:** Preserves Arrow Up/Down navigation inside multiline drafts while only recalling past inputs when the caret is at the start/end of an empty field.
+### Caret-friendly Arrow Up/Down navigation
+- **Purpose / What it does:** Keeps Arrow Up/Down focused on moving the caret through multiline drafts without recalling past inputs, preventing unexpected history jumps.
 - **Usage example:**
 
 ```html
@@ -90,7 +90,7 @@ yarn build
   Chatbot.init({
     chatflowid: '<chatflowid>',
     apiHost: 'http://localhost:3000',
-    // Input history is enabled by default; Arrow Up/Down moves within text unless at boundaries
+    // Arrow keys keep navigating inside the current draft; previous messages are not recalled automatically
   });
 </script>
 ```

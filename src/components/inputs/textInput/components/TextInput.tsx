@@ -96,26 +96,7 @@ export const TextInput = (props: TextInputProps) => {
     }
 
     if (props.enableInputHistory && target) {
-      const hasContent = target.value.length > 0;
-      const caretIsCollapsed = target.selectionStart === target.selectionEnd;
-
-      if (!hasContent && caretIsCollapsed) {
-        if (e.key === 'ArrowUp') {
-          const isAtStart = target.selectionStart === 0;
-          if (isAtStart) {
-            e.preventDefault();
-            const previousInput = inputHistory().getPreviousInput(props.inputValue);
-            props.onInputChange(previousInput);
-          }
-        } else if (e.key === 'ArrowDown') {
-          const isAtEnd = target.selectionStart === target.value.length;
-          if (isAtEnd) {
-            e.preventDefault();
-            const nextInput = inputHistory().getNextInput();
-            props.onInputChange(nextInput);
-          }
-        }
-      }
+      if (e.key === 'ArrowUp' || e.key === 'ArrowDown') return;
     }
   };
 

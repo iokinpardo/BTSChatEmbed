@@ -577,10 +577,17 @@ export const Bot = (botProps: BotProps & { class?: string }) => {
   };
 
   const scrollToLatestBotMessageStart = () => {
-    if (!chatContainer || !lastBotMessageRef) return;
+    const container = chatContainer;
+    const target = lastBotMessageRef;
+
+    if (!container || !target) return;
 
     requestAnimationFrame(() => {
-      lastBotMessageRef?.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest' });
+      const containerRect = container.getBoundingClientRect();
+      const targetRect = target.getBoundingClientRect();
+      const targetTop = targetRect.top - containerRect.top + container.scrollTop;
+
+      container.scrollTo({ top: Math.max(targetTop, 0), behavior: 'smooth' });
     });
   };
 
