@@ -6,7 +6,6 @@ import { FileEvent, UploadsConfig } from '@/components/Bot';
 import { ImageUploadButton } from '@/components/buttons/ImageUploadButton';
 import { RecordAudioButton } from '@/components/buttons/RecordAudioButton';
 import { AttachmentUploadButton } from '@/components/buttons/AttachmentUploadButton';
-import { ChatInputHistory } from '@/utils/chatInputHistory';
 
 type TextInputProps = {
   placeholder?: string;
@@ -29,8 +28,6 @@ type TextInputProps = {
   sendMessageSound?: boolean;
   sendSoundLocation?: string;
   fullFileUploadAllowedTypes?: string;
-  enableInputHistory?: boolean;
-  maxHistorySize?: number;
 };
 
 const defaultBackgroundColor = '#ffffff';
@@ -41,7 +38,6 @@ const defaultSendSound = 'https://cdn.jsdelivr.net/gh/FlowiseAI/FlowiseChatEmbed
 export const TextInput = (props: TextInputProps) => {
   const [isSendButtonDisabled, setIsSendButtonDisabled] = createSignal(false);
   const [warningMessage, setWarningMessage] = createSignal('');
-  const [inputHistory] = createSignal(new ChatInputHistory(() => props.maxHistorySize || 10));
   let inputRef: HTMLInputElement | HTMLTextAreaElement | undefined;
   let fileUploadRef: HTMLInputElement | HTMLTextAreaElement | undefined;
   let imgUploadRef: HTMLInputElement | HTMLTextAreaElement | undefined;
@@ -65,9 +61,6 @@ export const TextInput = (props: TextInputProps) => {
 
   const submit = () => {
     if (checkIfInputIsValid()) {
-      if (props.enableInputHistory) {
-        inputHistory().addToHistory(props.inputValue);
-      }
       props.onSubmit(props.inputValue);
       if (props.sendMessageSound && audioRef) {
         audioRef.play();
@@ -90,16 +83,7 @@ export const TextInput = (props: TextInputProps) => {
         e.preventDefault();
         submit();
       }
-    } else if (props.enableInputHistory) {
-      if (e.key === 'ArrowUp') {
-        e.preventDefault();
-        const previousInput = inputHistory().getPreviousInput(props.inputValue);
-        props.onInputChange(previousInput);
-      } else if (e.key === 'ArrowDown') {
-        e.preventDefault();
-        const nextInput = inputHistory().getNextInput();
-        props.onInputChange(nextInput);
-      }
+      return;
     }
   };
 

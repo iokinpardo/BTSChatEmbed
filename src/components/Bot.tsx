@@ -460,6 +460,8 @@ export const Bot = (botProps: BotProps & { class?: string }) => {
   let chatContainer: HTMLDivElement | undefined;
   let bottomSpacer: HTMLDivElement | undefined;
   let botContainer: HTMLDivElement | undefined;
+  let lastBotMessageRef: HTMLElement | undefined;
+  let previousMessageCount = 0;
 
   const [userInput, setUserInput] = createSignal('');
   const [loading, setLoading] = createSignal(false);
@@ -572,6 +574,31 @@ export const Bot = (botProps: BotProps & { class?: string }) => {
     setTimeout(() => {
       chatContainer?.scrollTo(0, chatContainer.scrollHeight);
     }, 50);
+  };
+
+  const scrollToLatestBotMessageStart = () => {
+    const container = chatContainer;
+    const target = lastBotMessageRef;
+
+    if (!container || !target) return;
+
+    requestAnimationFrame(() => {
+      let offsetTop = target.offsetTop;
+      let node = target.offsetParent as HTMLElement | null;
+
+      while (node && node !== container) {
+        offsetTop += node.offsetTop;
+        node = node.offsetParent as HTMLElement | null;
+      }
+
+      if (node !== container) {
+        const containerRect = container.getBoundingClientRect();
+        const targetRect = target.getBoundingClientRect();
+        offsetTop = targetRect.top - containerRect.top + container.scrollTop;
+      }
+
+      container.scrollTo({ top: Math.max(offsetTop, 0), behavior: 'smooth' });
+    });
   };
 
   // Helper function to manage TTS action flag
@@ -929,7 +956,7 @@ export const Bot = (botProps: BotProps & { class?: string }) => {
     setUploadedFiles([]);
     hasSoundPlayed = false;
     setTimeout(() => {
-      scrollToBottom();
+      scrollToLatestBotMessageStart();
     }, 100);
   };
 
@@ -1139,7 +1166,7 @@ export const Bot = (botProps: BotProps & { class?: string }) => {
         setLoading(false);
         setUserInput('');
         setUploadedFiles([]);
-        scrollToBottom();
+        scrollToLatestBotMessageStart();
       }
       if (result.error) {
         const error = result.error;
@@ -1281,13 +1308,25 @@ export const Bot = (botProps: BotProps & { class?: string }) => {
 
   // Auto scroll chat to bottom (but not during TTS actions)
   createEffect(() => {
-    if (messages()) {
-      if (messages().length > 1 && !isTTSActionRef) {
+    const currentMessages = messages();
+
+    if (!currentMessages) return;
+
+    const latestMessage = currentMessages[currentMessages.length - 1];
+
+    if (currentMessages.length > 1 && !isTTSActionRef) {
+      if (latestMessage?.type === 'apiMessage' && currentMessages.length !== previousMessageCount) {
+        setTimeout(() => {
+          scrollToLatestBotMessageStart();
+        }, 400);
+      } else if (latestMessage?.type !== 'apiMessage') {
         setTimeout(() => {
           chatContainer?.scrollTo(0, chatContainer.scrollHeight);
         }, 400);
       }
     }
+
+    previousMessageCount = currentMessages.length;
   });
 
   createEffect(() => {
@@ -2422,85 +2461,93 @@ export const Bot = (botProps: BotProps & { class?: string }) => {
               </DeleteButton>
             </div>
           ) : null}
-          <div class="flex flex-col w-full h-full justify-start z-0">
-            <div
-              ref={chatContainer}
-              class="overflow-y-scroll flex flex-col flex-grow min-w-full w-full px-3 pt-[70px] relative scrollable-container chatbot-chat-view scroll-smooth"
-            >
-              <For each={[...messages()]}>
-                {(message, index) => {
-                  return (
-                    <>
-                      {message.type === 'userMessage' && (
-                        <GuestBubble
-                          message={message}
-                          apiHost={props.apiHost}
-                          chatflowid={props.chatflowid}
-                          chatId={chatId()}
-                          backgroundColor={props.userMessage?.backgroundColor}
-                          textColor={props.userMessage?.textColor}
-                          showAvatar={props.userMessage?.showAvatar}
-                          avatarSrc={props.userMessage?.avatarSrc}
-                          fontSize={props.fontSize}
-                          renderHTML={props.renderHTML}
-                        />
-                      )}
-                      {message.type === 'apiMessage' && (
-                        <BotBubble
-                          message={message}
-                          fileAnnotations={message.fileAnnotations}
-                          chatflowid={props.chatflowid}
-                          chatId={chatId()}
-                          apiHost={props.apiHost}
-                          backgroundColor={props.botMessage?.backgroundColor}
-                          textColor={props.botMessage?.textColor}
-                          feedbackColor={props.feedback?.color}
-                          showAvatar={props.botMessage?.showAvatar}
-                          avatarSrc={props.botMessage?.avatarSrc}
-                          chatFeedbackStatus={chatFeedbackStatus()}
-                          fontSize={props.fontSize}
-                          isLoading={loading() && index() === messages().length - 1}
-                          showAgentMessages={props.showAgentMessages}
-                          handleActionClick={(elem, action) => handleActionClick(elem, action)}
-                          sourceDocsTitle={props.sourceDocsTitle}
-                          handleSourceDocumentsClick={(sourceDocuments) => {
-                            setSourcePopupSrc(sourceDocuments);
-                            setSourcePopupOpen(true);
-                          }}
-                          dateTimeToggle={props.dateTimeToggle}
-                          renderHTML={props.renderHTML}
-                          isTTSEnabled={isTTSEnabled()}
-                          isTTSLoading={isTTSLoading()}
-                          isTTSPlaying={isTTSPlaying()}
-                          handleTTSClick={handleTTSClick}
-                          handleTTSStop={handleTTSStop}
-                        />
-                      )}
-                      {message.type === 'leadCaptureMessage' && leadsConfig()?.status && !getLocalStorageChatflow(props.chatflowid)?.lead && (
-                        <LeadCaptureBubble
-                          message={message}
-                          chatflowid={props.chatflowid}
-                          chatId={chatId()}
-                          apiHost={props.apiHost}
-                          backgroundColor={props.botMessage?.backgroundColor}
-                          textColor={props.botMessage?.textColor}
-                          fontSize={props.fontSize}
-                          showAvatar={props.botMessage?.showAvatar}
-                          avatarSrc={props.botMessage?.avatarSrc}
-                          leadsConfig={leadsConfig()}
-                          sendButtonColor={props.textInput?.sendButtonColor}
-                          isLeadSaved={isLeadSaved()}
-                          setIsLeadSaved={setIsLeadSaved}
-                          setLeadEmail={setLeadEmail}
-                        />
-                      )}
-                      {message.type === 'userMessage' && loading() && index() === messages().length - 1 && <LoadingBubble />}
-                      {message.type === 'apiMessage' && message.message === '' && loading() && index() === messages().length - 1 && <LoadingBubble />}
-                    </>
-                  );
-                }}
-              </For>
-            </div>
+          <div class="flex flex-col w-full h-full min-h-0 justify-start z-0">
+            <div class="flex flex-col flex-1 min-h-0">
+              <div
+                ref={chatContainer}
+                class="overflow-y-auto flex flex-col flex-1 min-h-0 min-w-full w-full px-3 pt-[70px] pb-4 relative scrollable-container chatbot-chat-view scroll-smooth"
+              >
+                <For each={[...messages()]}>
+                  {(message, index) => {
+                    return (
+                      <div
+                        ref={(el) => {
+                          if (message.type === 'apiMessage') {
+                            lastBotMessageRef = el;
+                          }
+                        }}
+                        class="w-full"
+                      >
+                        {message.type === 'userMessage' && (
+                          <GuestBubble
+                            message={message}
+                            apiHost={props.apiHost}
+                            chatflowid={props.chatflowid}
+                            chatId={chatId()}
+                            backgroundColor={props.userMessage?.backgroundColor}
+                            textColor={props.userMessage?.textColor}
+                            showAvatar={props.userMessage?.showAvatar}
+                            avatarSrc={props.userMessage?.avatarSrc}
+                            fontSize={props.fontSize}
+                            renderHTML={props.renderHTML}
+                          />
+                        )}
+                        {message.type === 'apiMessage' && (
+                          <BotBubble
+                            message={message}
+                            fileAnnotations={message.fileAnnotations}
+                            chatflowid={props.chatflowid}
+                            chatId={chatId()}
+                            apiHost={props.apiHost}
+                            backgroundColor={props.botMessage?.backgroundColor}
+                            textColor={props.botMessage?.textColor}
+                            feedbackColor={props.feedback?.color}
+                            showAvatar={props.botMessage?.showAvatar}
+                            avatarSrc={props.botMessage?.avatarSrc}
+                            chatFeedbackStatus={chatFeedbackStatus()}
+                            fontSize={props.fontSize}
+                            isLoading={loading() && index() === messages().length - 1}
+                            showAgentMessages={props.showAgentMessages}
+                            handleActionClick={(elem, action) => handleActionClick(elem, action)}
+                            sourceDocsTitle={props.sourceDocsTitle}
+                            handleSourceDocumentsClick={(sourceDocuments) => {
+                              setSourcePopupSrc(sourceDocuments);
+                              setSourcePopupOpen(true);
+                            }}
+                            dateTimeToggle={props.dateTimeToggle}
+                            renderHTML={props.renderHTML}
+                            isTTSEnabled={isTTSEnabled()}
+                            isTTSLoading={isTTSLoading()}
+                            isTTSPlaying={isTTSPlaying()}
+                            handleTTSClick={handleTTSClick}
+                            handleTTSStop={handleTTSStop}
+                          />
+                        )}
+                        {message.type === 'leadCaptureMessage' && leadsConfig()?.status && !getLocalStorageChatflow(props.chatflowid)?.lead && (
+                          <LeadCaptureBubble
+                            message={message}
+                            chatflowid={props.chatflowid}
+                            chatId={chatId()}
+                            apiHost={props.apiHost}
+                            backgroundColor={props.botMessage?.backgroundColor}
+                            textColor={props.botMessage?.textColor}
+                            fontSize={props.fontSize}
+                            showAvatar={props.botMessage?.showAvatar}
+                            avatarSrc={props.botMessage?.avatarSrc}
+                            leadsConfig={leadsConfig()}
+                            sendButtonColor={props.textInput?.sendButtonColor}
+                            isLeadSaved={isLeadSaved()}
+                            setIsLeadSaved={setIsLeadSaved}
+                            setLeadEmail={setLeadEmail}
+                          />
+                        )}
+                        {message.type === 'userMessage' && loading() && index() === messages().length - 1 && <LoadingBubble />}
+                        {message.type === 'apiMessage' && message.message === '' && loading() && index() === messages().length - 1 && <LoadingBubble />}
+                      </div>
+                    );
+                  }}
+                </For>
+              </div>
             <Show when={messages().length === 1}>
               <Show when={starterPrompts().length > 0}>
                 <div class="w-full flex flex-row flex-wrap px-5 py-[10px] gap-2">
@@ -2542,6 +2589,7 @@ export const Bot = (botProps: BotProps & { class?: string }) => {
                 <For each={[...previews()]}>{(item) => <>{previewDisplay(item)}</>}</For>
               </div>
             </Show>
+            </div>
             <div class="w-full px-5 pt-2 pb-1">
               {isRecording() ? (
                 <>
@@ -2614,8 +2662,6 @@ export const Bot = (botProps: BotProps & { class?: string }) => {
                   handleFileChange={handleFileChange}
                   sendMessageSound={props.textInput?.sendMessageSound}
                   sendSoundLocation={props.textInput?.sendSoundLocation}
-                  enableInputHistory={true}
-                  maxHistorySize={10}
                 />
               )}
             </div>

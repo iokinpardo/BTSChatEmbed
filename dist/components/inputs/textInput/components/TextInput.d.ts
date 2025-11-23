@@ -21,8 +21,6 @@ type TextInputProps = {
     sendMessageSound?: boolean;
     sendSoundLocation?: string;
     fullFileUploadAllowedTypes?: string;
-    enableInputHistory?: boolean;
-    maxHistorySize?: number;
 };
 export declare const TextInput: (props: TextInputProps) => import("solid-js").JSX.Element;
 export {};

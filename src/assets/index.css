@@ -251,6 +251,12 @@ textarea {
 
 .chatbot-chat-view {
   max-width: 800px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.chatbot-chat-view::-webkit-scrollbar {
+  display: none;
 }
 
 .ping span {
